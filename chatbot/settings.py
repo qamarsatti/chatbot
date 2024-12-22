@@ -139,3 +139,10 @@ STATIC_URL = "static/"
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# login url
+LOGIN_URL = "login"
+# redirect url after login
+LOGIN_REDIRECT_URL = "chatbot"
+# logout url
+LOGOUT_REDIRECT_URL = "login"
