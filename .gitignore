@@ -1,0 +1,51 @@
+# Python bytecode
+*.pyc
+*.pyo
+__pycache__/
+
+# Django stuff
+*.log
+*.pot
+*.py[cod]
+*.sqlite3
+db.sqlite3
+
+# Media and static files
+/media
+/staticfiles
+/static
+
+# Environment variables
+.env
+*.env
+
+# Virtual environment
+venv/
+env/
+
+# IDEs and editors
+.idea/
+.vscode/
+*.swp
+*~
+.project
+*.sublime-workspace
+*.sublime-project
+
+
+
+# Test result logs
+*.pytest_cache
+.tox
+.nox
+
+
+# Django migrations
+*.pyc
+*.pyo
+__pycache__/
+*.pkl
+*.log
+*.pot
+*.mo
+migrations/
