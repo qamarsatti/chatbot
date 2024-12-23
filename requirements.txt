@@ -1,0 +1,7 @@
+Django
+openai
+openai
+pgvector
+psycopg2-binary
+PyPDF2
+python-dotenv

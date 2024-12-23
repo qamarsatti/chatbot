@@ -1,6 +1,13 @@
 from django.urls import path
 
-from app.views import ChatbotView, LoginView, LogoutView, SignupView, UploadDocumentView
+from app.views import (
+    ChatbotView,
+    DocumentDeleteView,
+    LoginView,
+    LogoutView,
+    SignupView,
+    UploadDocumentView,
+)
 
 urlpatterns = [
     path("signup/", SignupView.as_view(), name="signup"),
@@ -8,4 +15,5 @@ urlpatterns = [
     path("logout/", LogoutView.as_view(), name="logout"),
     path("upload-document/", UploadDocumentView.as_view(), name="upload_document"),
     path("", ChatbotView.as_view(), name="chatbot"),
+    path("document-delete", DocumentDeleteView.as_view(), name="document-delete"),
 ]
