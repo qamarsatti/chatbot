@@ -12,6 +12,7 @@
             flex-direction: column;
             height: 100vh;
             overflow: hidden;
+            background-color: #f9f9f9;
         }
 
         .header {
@@ -46,6 +47,7 @@
             display: flex;
             flex: 1;
             width: 100%;
+            overflow: hidden;
         }
 
         .sidebar {
@@ -64,6 +66,9 @@
         .document-list {
             list-style-type: none;
             padding: 0;
+            margin: 0;
+            max-height: calc(100vh - 150px);
+            overflow-y: auto;
         }
 
         .document-list li {
@@ -82,17 +87,23 @@
             margin-top: 20px;
         }
 
-        .upload-link a {
+        .upload-link a, .delete-btn {
             text-decoration: none;
             color: white;
             background-color: #007bff;
             padding: 10px 20px;
             border-radius: 5px;
             display: inline-block;
+            text-align: center;
         }
 
-        .upload-link a:hover {
+        .upload-link a:hover, .delete-btn:hover {
             background-color: #0056b3;
+        }
+
+        .delete-btn {
+            margin-top: 10px;
+            display: block;
         }
 
         .chat-area {
@@ -101,6 +112,7 @@
             flex-direction: column;
             background-color: #fff;
             height: 100%;
+            overflow: hidden;
         }
 
         .messages {
@@ -140,67 +152,145 @@
 
         .input-area {
             display: flex;
+            width: 100%;
             padding: 10px;
             border-top: 1px solid #ddd;
+            background-color: #f9f9f9;
+        }
+
+        .input-area form {
+            width: 100%;
+            display: flex;
+            gap: 10px;
         }
 
         .input-area input[type="text"] {
             flex: 1;
-            padding: 10px;
-            border: 1px solid #ddd;
+            padding: 15px;
+            border: 1px solid #ccc;
             border-radius: 5px;
-            margin-right: 10px;
             outline: none;
+            font-size: 1rem;
+            background-color: #fff;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .input-area input[type="text"]:focus {
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+            border-color: #007bff;
         }
 
         .input-area button {
-            padding: 10px 20px;
+            padding: 15px 20px;
             border: none;
+            border-radius: 5px;
             background-color: #007bff;
             color: white;
-            border-radius: 5px;
+            font-size: 1rem;
             cursor: pointer;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.2s ease, transform 0.1s ease;
         }
 
         .input-area button:hover {
             background-color: #0056b3;
+        }
+
+        .input-area button:active {
+            transform: scale(0.95);
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
         }
     </style>
 </head>
 <body>
     <div class="header">
         <h1>Chat Interface</h1>
+        <h1>Welcome, {{ user.username }}</h1>
         <form action="/logout/" method="get">
-
-        <button type="submit">Logout</button>
-    </form>
+            <button type="submit">Logout</button>
+        </form>
     </div>
     <div class="container">
         <div class="sidebar">
             <h2>Uploaded Documents</h2>
             <ul class="document-list">
                 {% for document in documents %}
-                <li>{{document.document_name}}</li>
+                <li>{{ document.title }}</li>
                 {% endfor %}
             </ul>
             <div class="upload-link">
                 <a href="/upload-document">Upload Document</a>
             </div>
+            <form action="/document-delete" method="post">
+                {% csrf_token %}
+            <button class="delete-btn" type="submit">Delete All Documents</button>
+        </form>
         </div>
         <div class="chat-area">
-            <div class="messages">
-                <div class="message user">
-                    <div class="text">Hello!</div>
-                </div>
-                <div class="message bot">
-                    <div class="text">Hi there! How can I assist you?</div>
-                </div>
-            </div>
+            <div class="messages"></div>
             <div class="input-area">
-                <input type="text" placeholder="Type your message here...">
-                <button>Send</button>
+                <form onsubmit="sendMessage(event)">
+                    {% csrf_token %}
+                    <input id="chat-input" type="text" placeholder="Type your message here..." required>
+                    <button type="submit">Send</button>
+                </form>
             </div>
         </div>
     </div>
+    <script>
+        async function sendMessage(event) {
+            event.preventDefault();
+            const inputField = document.querySelector('#chat-input');
+            const messagesContainer = document.querySelector('.messages');
+            const userMessage = inputField.value;
+
+            if (!userMessage.trim()) return;
+
+            // Display the user message
+            const userMessageHTML = `
+                <div class="message user">
+                    <div class="text">${userMessage}</div>
+                </div>
+            `;
+            messagesContainer.innerHTML += userMessageHTML;
+
+            // Scroll to the bottom
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+            // Send the user message to the server
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+            const response = await fetch('/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
+                body: JSON.stringify({ query: userMessage })
+            });
+
+            // Display the bot response
+            if (response.ok) {
+                const data = await response.json();
+                const botMessageHTML = `
+                    <div class="message bot">
+                        <div class="text">${data.response}</div>
+                    </div>
+                `;
+                messagesContainer.innerHTML += botMessageHTML;
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            } else {
+                const errorHTML = `
+                    <div class="message bot">
+                        <div class="text">Something went wrong. Please try again later.</div>
+                    </div>
+                `;
+                messagesContainer.innerHTML += errorHTML;
+            }
+
+            // Clear the input field
+            inputField.value = '';
+        }
+    </script>
+
 </body>
 </html>
