@@ -23,6 +23,7 @@ def generate_embeddings(text, model="text-embedding-ada-002"):
 def query_chatbot(query, user):
     client = OpenAI()
     try:
+        user_query = query
         query_embedding = generate_embeddings(query)
         results = PDFEmbedding.objects.filter(user=user).order_by(
             L2Distance("embedding", query_embedding)
@@ -34,7 +35,7 @@ def query_chatbot(query, user):
         # Create a prompt for OpenAI LLM (e.g., GPT-4 or GPT-3.5)
         prompt = (
             f"Here are some relevant documents\n{context}\n\n"
-            "Please answer the following question based on the documents: {query}"
+            "Please answer the following question based on the documents:" + user_query
         )
 
         completion = client.chat.completions.create(
